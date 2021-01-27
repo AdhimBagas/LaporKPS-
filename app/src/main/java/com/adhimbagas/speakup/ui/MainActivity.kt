@@ -1,9 +1,10 @@
-package com.adhimbagas.speakup
+package com.adhimbagas.speakup.ui
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
+import com.adhimbagas.speakup.R
 import com.adhimbagas.speakup.databinding.ActivityMainBinding
 import com.adhimbagas.speakup.ui.auth.LoginSignUpActivity
 

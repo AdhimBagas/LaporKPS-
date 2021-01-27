@@ -9,8 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SpeakUp">
-        <activity android:name=".ui.auth.LoginSignUpActivity"></activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".ui.home.HomeActivity"></activity>
+        <activity android:name=".ui.auth.LoginSignUpActivity" />
+        <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

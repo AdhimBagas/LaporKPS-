@@ -22,9 +22,12 @@ class LoginFragment : Fragment() {
             inflater, R.layout.fragment_login,container,false
         )
 
+
         binding.tvSignUp.setOnClickListener { view: View ->
             view.findNavController().navigate(R.id.action_loginFragment_to_signUpFragment)
         }
+
+
         // Inflate the layout for this fragment
         return binding.root
 
