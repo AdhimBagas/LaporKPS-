@@ -3,24 +3,20 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.util.Patterns
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.core.content.contentValuesOf
 import androidx.databinding.DataBindingUtil
 import com.adhimbagas.speakup.R
 import com.adhimbagas.speakup.databinding.FragmentSignUpBinding
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import java.util.*
 import kotlinx.android.synthetic.main.fragment_sign_up.*
@@ -29,7 +25,9 @@ import kotlinx.android.synthetic.main.fragment_sign_up.*
 class SignUpFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
-    var selectedPhotoUri: Uri? = null
+    private var selectedPhotoUri: Uri? = null
+
+
 
     override fun onCreateView(
 
@@ -44,13 +42,10 @@ class SignUpFragment : Fragment() {
                 inflater, R.layout.fragment_sign_up,container,false
         )
 
-        val view = binding.root
 
-        auth = Firebase.auth
+        auth = FirebaseAuth.getInstance()
 
-        val email = binding.tvEmail.text.toString().trim()
-        val username = binding.tvUsername.text.toString().trim()
-        val password =  binding.tvPassword.toString().trim()
+
 
 
         binding.btnSelectedPhoto.setOnClickListener{
@@ -65,23 +60,34 @@ class SignUpFragment : Fragment() {
 
         binding.btnRegister.setOnClickListener {
 
+            val email = binding.tvEmail.text.toString()
+            val username = binding.tvUsername.text.toString().trim()
+            val password =  binding.tvPassword.toString().trim()
 
             if (email.isEmpty()){
                 binding.tfEmail.error = "Email Required"
+                Log.d("RegisterActivity", "Email kosong. . ")
                 return@setOnClickListener
+            } else{
+                Log.d("RegisterActivity", "email selected ")
             }
 
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
                 binding.tfEmail.error = "Valid Email Required"
-                binding.tfEmail.requestFocus()
+                Log.d("RegisterActivity", "Email tidak valid. . ")
                 return@setOnClickListener
-            }
+            } else
+                Log.d("RegisterActivity", "email valid ")
 
             if (username.isEmpty()){
-                binding.tfUsername.error = "Username Required"
+                binding.tfUsername.setErrorIconOnClickListener {
+                    Toast.makeText(context, "username is empty, please input username", Toast.LENGTH_SHORT).show()
+                }
+                Log.d("Register Activity", "Username is empty ")
                 binding.tfUsername.requestFocus()
                 return@setOnClickListener
-            }
+            }  else
+                Log.d("RegisterActivity", "email selected ")
 
             if (password.isEmpty() || password.length< 8){
                 binding.tfPassword.error = "8 Char password required"
@@ -94,12 +100,20 @@ class SignUpFragment : Fragment() {
                     .addOnCompleteListener{ task ->
 
                         if (task.isSuccessful){
-                            Log.d("RegisterActivity", "Login Success")
-                            Toast.makeText(context, "Login Succes, please re-login. .", Toast.LENGTH_SHORT).show()
+                            Log.d("RegisterActivity", "Register Success")
+                            Toast.makeText(context, "Register Succes, please re-login. .", Toast.LENGTH_SHORT).show()
+                            uploadImageToFirebaseStorage()
 
-                        }
-                        
 
+                        } else
+                            task.isCanceled
+
+
+
+                    }
+                    .addOnFailureListener {
+                        Log.d("RegisterActivity","Failed to create user")
+                        Toast.makeText(context, "Failed to create user, please Try Again", Toast.LENGTH_SHORT).show()
                     }
 
 
@@ -107,7 +121,7 @@ class SignUpFragment : Fragment() {
 
 
 
-        return view    }
+        return  binding.root   }
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -124,7 +138,7 @@ class SignUpFragment : Fragment() {
             btn_selected_photo.alpha = 0f
         }
     }
-    /*
+
     private fun uploadImageToFirebaseStorage() {
         if (selectedPhotoUri == null) return
         val filename = UUID.randomUUID().toString()
@@ -133,27 +147,41 @@ class SignUpFragment : Fragment() {
         ref.putFile(selectedPhotoUri!!)
                 .addOnSuccessListener {
                     Log.d("RegisterActivity", "Succesfull uploaded Image")
+                    ref.downloadUrl.addOnSuccessListener {
+                        Log.d("RegisterActivity", "Succesfull download url here : $it")
+                        saveUserToFirebase(it.toString())
+                    }
+
                 }
-        ref.downloadUrl
+                .addOnFailureListener {
+                    Toast.makeText(context, "Image can't upload, please try again", Toast.LENGTH_LONG).show()
+                }
+
+
+
+
 
 
     }
-     */
-        /*
-    private fun saveUsernameToDatabase() {
-        val Uid = FirebaseAuth.getInstance().uid
-        val refUser = FirebaseDatabase.getInstance().getReference("/users/$Uid")
-        val user = User(id, )
-        refUser.setValue(user)
+
+    private fun saveUserToFirebase(profileImageUrl: String) {
+        val uid = FirebaseAuth.getInstance().uid ?: ""
+        val ref = FirebaseDatabase.getInstance().getReference("/users/$uid")
+        val user = User (uid, tvUsername.text.toString(), profileImageUrl)
+        ref.setValue(user)
+                .addOnSuccessListener {
+                    Log.d("RegisterActivity", "Succesfull save username")
+                }
+                .addOnFailureListener {
+                    Log.d("RegisterActivity", "cannot save user")
+                }
     }
-    */
+
+
 
 
 }
 
-/*
-class User(val id: String, val username: String, val profileImage: String) : View() {
 
-}
+class User(val uid: String, val username: String, val profileImageUrl: String)
 
-*/
