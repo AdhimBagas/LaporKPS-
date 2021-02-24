@@ -9,11 +9,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import com.adhimbagas.speakup.R
 import com.adhimbagas.speakup.databinding.FragmentSignUpBinding
+import com.adhimbagas.speakup.ui.home.HomeActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -99,11 +99,18 @@ class SignUpFragment : Fragment() {
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener{ task ->
 
+
+
                         if (task.isSuccessful){
                             Log.d("RegisterActivity", "Register Success")
                             Toast.makeText(context, "Register Succes, please re-login. .", Toast.LENGTH_SHORT).show()
                             uploadImageToFirebaseStorage()
 
+                            activity?.let {
+                                val intent = Intent (it, HomeActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                startActivity(intent)
+                            }
 
                         } else
                             task.isCanceled
@@ -122,6 +129,10 @@ class SignUpFragment : Fragment() {
 
 
         return  binding.root   }
+
+
+
+
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
